@@ -72,6 +72,33 @@ export async function createHerokuDeployment(input: {
     throw new Error("The bot repository must be public and have a default branch.");
   }
 
+  const treeResponse = await fetch(
+    `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/git/trees/${encodeURIComponent(metadata.default_branch)}?recursive=1`,
+    { headers: { Accept: "application/vnd.github+json" }, signal: AbortSignal.timeout(15_000) },
+  );
+  if (!treeResponse.ok) {
+    await treeResponse.body?.cancel();
+    throw new Error("Could not verify the bot repository's tracked files.");
+  }
+  const tree = (await treeResponse.json()) as { tree?: Array<{ path?: string }>; truncated?: boolean };
+  if (tree.truncated) throw new Error("Could not verify all tracked bot source files; deployment is blocked.");
+  const trackedPaths = new Set((tree.tree ?? []).map((item) => (item.path ?? "").toLowerCase()));
+  if (trackedPaths.has(".env") || trackedPaths.has("session/creds.json")) {
+    throw new Error("Deployment blocked: this public repository contains a tracked environment/session file. Remove it and rotate any credentials or WhatsApp session it may contain before deploying.");
+  }
+  const sourceResponse = await fetch(
+    `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(metadata.default_branch)}/index.js`,
+    { signal: AbortSignal.timeout(15_000) },
+  );
+  if (!sourceResponse.ok) {
+    await sourceResponse.body?.cancel();
+    throw new Error("Could not verify the bot entrypoint before deployment.");
+  }
+  const source = await sourceResponse.text();
+  if (/SESSION_DB_URL\s*=\s*process\.env\.SESSION_DB_URL\s*\|\|\s*['\"]postgres(?:ql)?:\/\//i.test(source)) {
+    throw new Error("Deployment blocked: this repository has a hard-coded database connection in its source. Rotate its credentials and remove the fallback before deployment.");
+  }
+
   const app = await herokuRequest<HerokuApp>("/apps", {
     method: "POST",
     body: { name: input.appName, region: "eu" },
@@ -80,11 +107,17 @@ export async function createHerokuDeployment(input: {
   try {
     await herokuRequest<Record<string, string>>(`/apps/${app.id}/config-vars`, {
       method: "PATCH",
-      body: {
-        BOT_TEMPLATE_ID: input.botTemplateId,
-        WHATSAPP_SESSION_ID: input.sessionId,
-        NODE_ENV: "production",
-      },
+      body: input.botTemplateId === "black-md"
+        ? {
+            SESSION: input.sessionId,
+            APP_NAME: input.appName,
+            NODE_ENV: "production",
+          }
+        : {
+            BOT_TEMPLATE_ID: input.botTemplateId,
+            WHATSAPP_SESSION_ID: input.sessionId,
+            NODE_ENV: "production",
+          },
     });
     const sourceUrl = `https://github.com/${owner}/${repo}/tarball/${encodeURIComponent(metadata.default_branch)}/`;
     const build = await herokuRequest<HerokuBuild>(`/apps/${app.id}/builds`, {

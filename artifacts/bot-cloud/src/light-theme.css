@@ -1,0 +1,91 @@
+/* White, high-contrast cyan/blue skin requested for BotFleet. */
+:root {
+  color-scheme: light;
+  --ink: #10243a;
+  --sub: #536b82;
+  --dim: #71869b;
+  --panel: #ffffff;
+  --panel2: #f5faff;
+  --line: #dceaf5;
+  --green: #0877ef;
+  --green-soft: #e6f6ff;
+  --gold: #d8910b;
+  --coral: #d84c6f;
+  --aqua: #00b9d6;
+  --shell: #f7fbff;
+  --background: 0 0% 100%; --foreground: 210 48% 15%;
+  --border: 205 44% 90%; --input: 205 44% 90%;
+  --card: 0 0% 100%; --card-foreground: 210 48% 15%; --card-border: 205 44% 90%;
+  --popover: 0 0% 100%; --popover-foreground: 210 48% 15%; --popover-border: 205 44% 90%;
+  --primary: 211 94% 48%; --primary-foreground: 0 0% 100%;
+  --secondary: 197 100% 96%; --secondary-foreground: 210 48% 15%;
+  --muted: 205 35% 96%; --muted-foreground: 210 24% 42%;
+  --accent: 188 100% 42%; --accent-foreground: 0 0% 100%;
+  --ring: 188 100% 42%; --sidebar: 0 0% 100%; --sidebar-foreground: 210 48% 15%;
+  --sidebar-border: 205 44% 90%; --sidebar-primary: 211 94% 48%;
+  --sidebar-primary-foreground: 0 0% 100%; --sidebar-accent: 197 100% 96%;
+  --sidebar-accent-foreground: 210 48% 15%; --sidebar-ring: 188 100% 42%;
+}
+body { background:#f7fbff!important; color:#10243a; background-image:radial-gradient(ellipse at 75% 0%,rgba(0,185,214,.08),transparent 34%)!important; }
+.public-page,.app-frame,.main-column { background:#f7fbff!important; color:#10243a!important; }
+.public-nav,.public-footer,.proof-strip { border-color:#deebf5!important; }
+.public-nav,.public-footer { background:rgba(255,255,255,.92); }
+.nav-status,.nav-signin,.hero-sub,.hero-proof,.hero-foot,.proof-strip span,.story-text p,.manifesto p { color:#536b82!important; }
+.hero-grid { opacity:.55!important; background-image:linear-gradient(rgba(0,153,206,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(0,153,206,.07) 1px,transparent 1px)!important; }
+.hero h1,.story-grid h2,.manifesto h2 { color:#10243a!important; }
+.hero h1 em,.story-grid h2 em,.manifesto h2 em { color:#0877ef!important; }
+.eyebrow,.eyebrow-chip,.section-kicker,.text-link { color:#0877ef!important; }
+.eyebrow-line { background:#00b9d6!important; }
+.eyebrow-chip { border-color:rgba(0,185,214,.35)!important; }
+.btn-primary,.public-page .btn-primary { background:linear-gradient(105deg,#0877ef,#00b9d6)!important; color:#fff!important; box-shadow:0 8px 22px rgba(8,119,239,.18); }
+.btn-outline,.btn-quiet { background:#fff!important; color:#25445f!important; border-color:#d6e5f1!important; }
+.btn-quiet:hover,.btn-outline:hover { background:#eff9ff!important; border-color:#9edcf1!important; }
+.brand { color:#10243a!important; }
+.brand-mark { background:#0877ef!important; color:#fff!important; }
+.brand-mark i { background:#00b9d6!important; border-color:#fff!important; }
+.brand>span:last-child>span { color:#0877ef!important; }
+.brand small { color:#647d94!important; }
+.console-window,.console-top,.console-chart,.console-bottom,.float-chip,.step-card,.manifesto,.stat-card,.panel,.activity-panel,.readiness-panel,.template-card,.instance-card,.wallet-hero,.wallet-stats,.ledger-panel,.deploy-modal,.payment-result,.support-card,.profile-card { background:#fff!important; color:#10243a!important; border-color:#dceaf5!important; box-shadow:0 14px 40px rgba(22,75,119,.08); }
+.console-window { box-shadow:0 24px 70px rgba(22,75,119,.14),0 0 60px rgba(0,185,214,.09)!important; }
+.console-top,.console-bottom { background:#f4faff!important; }
+.console-greet h3,.console-metrics strong,.console-bot,.bot-meta strong,.float-chip b,.step-card h3,.panel h3,.template-card h3,.instance-title h3,.page-heading h1,.deploy-modal h2,.payment-result h2 { color:#10243a!important; }
+.console-greet small,.console-metrics small,.console-metrics div>span,.chart-head,.chart-axis,.bot-meta small,.float-chip small,.visual-caption,.proof-strip b,.step-card p,.panel p,.template-card>p,.template-card li,.page-kicker,.section-kicker,.workspace-label,.side-link,.breadcrumb,.app-footer,.region-status,.wallet-foot,.wallet-stats small,.ledger-head,.ledger-row,.instance-copy>p,.instance-details span,.instance-renew small,.instance-renew span,.modal-description,.deploy-form label,.deploy-cost>span,.deploy-cost small { color:#536b82!important; }
+.console-metrics,.console-chart,.wallet-stats,.ledger-row,.ledger-head,.instance-renew { border-color:#dceaf5!important; }
+.console-metrics strong { color:#10243a!important; }
+.console-chart { background:#f5faff!important; }
+.console-window svg path[fill^="url"] { fill:#c8f5ff!important; }
+.console-window svg path[stroke] { stroke:#0877ef!important; }
+.live-tag,.live-dot,.status.green,.system-indicator:not(.degraded):not(.checking) { color:#0877ef!important; }
+.float-chip { box-shadow:0 12px 32px rgba(22,75,119,.12)!important; }
+.sidebar { background:#fff!important; border-color:#dceaf5!important; box-shadow:8px 0 32px rgba(25,84,132,.045); }
+.side-link { color:#536b82!important; }
+.side-link.active { background:#eaf7ff!important; color:#0877ef!important; }
+.side-brand,.topbar { background:rgba(255,255,255,.94)!important; border-color:#dceaf5!important; }
+.profile-avatar,.console-avatar { background:#e6f6ff!important; color:#0877ef!important; }
+.stat-icon,.step-icon,.wallet-symbol,.empty-illustration { background:#e6f6ff!important; color:#0877ef!important; }
+.overview-hero,.catalog-intro,.instance-summary,.deploy-cost,.secure-note,.inline-notice { background:#f0f9ff!important; color:#244866!important; border-color:#cfeafb!important; }
+.template-card,.instance-card { background:linear-gradient(145deg,#fff,#f6fbff)!important; }
+.template-card:hover,.instance-card:hover { border-color:#78d7ef!important; box-shadow:0 20px 42px rgba(0,157,208,.12)!important; }
+.page-heading h1 { color:#10243a!important; }
+.deploy-modal { background:#fff!important; }
+.deploy-form input { background:#f8fbff!important; border-color:#cfdfec!important; color:#10243a!important; }
+.deploy-form input:focus { border-color:#00b9d6!important; box-shadow:0 0 0 3px rgba(0,185,214,.14)!important; }
+.modal-backdrop { background:rgba(11,36,60,.42)!important; }
+.wallet-hero { background:radial-gradient(ellipse at 72% 40%,rgba(0,185,214,.13),transparent 39%),linear-gradient(115deg,#fff,#f2faff 70%,#fff)!important; }
+.wallet-main>strong,.wallet-side>b { color:#10243a!important; }
+.wallet-side { border-color:#dceaf5!important; }
+.ledger-empty { background:#fff!important; }
+.auth-page { background:radial-gradient(ellipse at 50% 44%,rgba(0,185,214,.12),transparent 42%),#f7fbff!important; }
+.auth-backdrop { opacity:.34!important; background-image:linear-gradient(rgba(0,153,206,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(0,153,206,.08) 1px,transparent 1px)!important; }
+.cl-cardBox { background:#fff!important; border-color:#dceaf5!important; box-shadow:0 25px 90px rgba(20,76,123,.12)!important; }
+.cl-formFieldInput::placeholder { color:#71869b!important; }
+.pairing-help { display:flex; gap:11px; align-items:flex-start; padding:12px; border:1px solid #cfeafb; background:#f0f9ff; border-radius:9px; color:#244866; }
+.pairing-help>span { width:22px; height:22px; flex:none; display:grid; place-items:center; border-radius:50%; background:#0877ef; color:#fff; font-size:11px; font-weight:800; }
+.pairing-help b { font-size:11px; color:#10243a; }
+.pairing-help p { margin:4px 0 7px; font-size:9px; line-height:1.55; color:#536b82; }
+.pairing-help a { display:inline-flex; gap:5px; align-items:center; color:#0877ef; font-size:9px; font-weight:800; }
+@media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important; animation-iteration-count:1!important; scroll-behavior:auto!important; } }
+.bot-cover { width:46px; height:46px; object-fit:cover; border-radius:12px; border:1px solid #cfeafb; background:#f0f9ff; }
+.setup-notice { width:min(560px,100%); padding:36px; border:1px solid #dceaf5; border-radius:18px; background:#fff; box-shadow:0 24px 70px rgba(22,75,119,.12); }
+.setup-notice h1 { margin:28px 0 10px; color:#10243a; font-size:28px; letter-spacing:-1px; }
+.setup-notice p { color:#536b82; line-height:1.7; margin-bottom:24px; }
