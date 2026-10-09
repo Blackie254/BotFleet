@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "WhatsApp Bot Hosting"
+description = "A secure hosting platform where customers sign in, fund a wallet via Paystack, select WhatsApp bot templates, deploy them to Heroku, and renew service monthly."
+version = "1.0.0"
+id = "artifacts/bot-cloud"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21899
+
+[services.development]
+run = "pnpm --filter @workspace/bot-cloud run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/bot-cloud", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/bot-cloud/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21899"
+BASE_PATH = "/"

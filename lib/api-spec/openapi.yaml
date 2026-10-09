@@ -3,13 +3,23 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: WhatsApp bot hosting, wallet, payments, and deployment API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: bots
+    description: Available WhatsApp bot templates
+  - name: dashboard
+    description: Account overview and activity
+  - name: wallet
+    description: Wallet balance, ledger, and funding
+  - name: payments
+    description: Paystack checkout and payment notifications
+  - name: instances
+    description: Customer bot deployments
 paths:
   /healthz:
     get:
@@ -24,7 +34,245 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /bots:
+    get:
+      operationId: listBotTemplates
+      tags: [bots]
+      summary: List available bot templates
+      responses:
+        "200":
+          description: Bot templates available for deployment
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BotTemplate"
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get the signed-in user's hosting overview
+      security:
+        - clerkSession: []
+      responses:
+        "200":
+          description: Account summary and recent activity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /wallet:
+    get:
+      operationId: getWallet
+      tags: [wallet]
+      summary: Get wallet balance, deployment capacity, and recent ledger activity
+      security:
+        - clerkSession: []
+      responses:
+        "200":
+          description: Wallet details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Wallet"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /wallet/topups:
+    post:
+      operationId: createWalletTopup
+      tags: [wallet]
+      summary: Start a Paystack wallet top-up
+      security:
+        - clerkSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WalletTopupInput"
+      responses:
+        "201":
+          description: Paystack hosted checkout session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutSession"
+        "400":
+          description: Invalid amount
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "503":
+          description: Paystack is not configured
+  /payments/paystack/webhook:
+    post:
+      operationId: receivePaystackWebhook
+      tags: [payments]
+      summary: Receive and validate a Paystack event
+      description: Public endpoint; the server validates the X-Paystack-Signature against the raw request body before processing it.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaystackWebhookEvent"
+      responses:
+        "200":
+          description: Event accepted or safely ignored as a duplicate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookReceipt"
+        "401":
+          description: Invalid webhook signature
+  /payments/verify:
+    get:
+      operationId: verifyWalletTopup
+      tags: [payments]
+      summary: Verify a checkout return with Paystack and apply an idempotent wallet credit
+      security:
+        - clerkSession: []
+      parameters:
+        - name: reference
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Payment result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentVerification"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Payment reference not found for this account
+  /instances:
+    get:
+      operationId: listBotInstances
+      tags: [instances]
+      summary: List the signed-in user's bot deployments
+      security:
+        - clerkSession: []
+      responses:
+        "200":
+          description: Bot deployments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BotInstance"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      operationId: createBotInstance
+      tags: [instances]
+      summary: Provision and deploy a bot using wallet funds
+      security:
+        - clerkSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BotInstanceInput"
+      responses:
+        "201":
+          description: Deployment accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotInstance"
+        "400":
+          description: Invalid bot details or unsupported repository URL
+        "402":
+          description: Wallet balance is below the KSh 50 monthly price
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "502":
+          description: Heroku could not start the deployment
+  /instances/{instanceId}/restart:
+    post:
+      operationId: restartBotInstance
+      tags: [instances]
+      summary: Restart a bot deployment
+      security:
+        - clerkSession: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+      responses:
+        "200":
+          description: Bot deployment restarted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotInstance"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Bot not found
+        "402":
+          description: Bot subscription is not current
+  /instances/{instanceId}/stop:
+    post:
+      operationId: stopBotInstance
+      tags: [instances]
+      summary: Stop a bot deployment without deleting it
+      security:
+        - clerkSession: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+      responses:
+        "200":
+          description: Bot deployment stopped
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotInstance"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Bot not found
+  /instances/{instanceId}/renew:
+    post:
+      operationId: renewBotInstance
+      tags: [instances]
+      summary: Renew a bot for one month using wallet funds
+      security:
+        - clerkSession: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+      responses:
+        "200":
+          description: Bot subscription renewed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotInstance"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          description: Bot not found
+        "402":
+          description: Wallet balance is below the KSh 50 monthly price
 components:
+  securitySchemes:
+    clerkSession:
+      type: apiKey
+      in: cookie
+      name: __session
+  parameters:
+    InstanceId:
+      name: instanceId
+      in: path
+      required: true
+      schema:
+        type: string
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +281,123 @@ components:
           type: string
       required:
         - status
+    BotTemplate:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        description: { type: string }
+        category: { type: string }
+        icon: { type: string }
+        monthlyPriceKsh: { type: integer }
+        features:
+          type: array
+          items: { type: string }
+        setupMode: { type: string, enum: [session_id] }
+      required: [id, name, description, category, icon, monthlyPriceKsh, features, setupMode]
+    Activity:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        detail: { type: string }
+        kind: { type: string, enum: [payment, deploy, renewal, system] }
+        createdAt: { type: string, format: date-time }
+      required: [id, title, detail, kind, createdAt]
+    DashboardSummary:
+      type: object
+      properties:
+        walletBalanceKsh: { type: integer }
+        activeBotCount: { type: integer }
+        deployingBotCount: { type: integer }
+        monthlySpendKsh: { type: integer }
+        botsFundable: { type: integer }
+        nextRenewalAt: { type: [string, "null"], format: date-time }
+        recentActivity:
+          type: array
+          items: { $ref: "#/components/schemas/Activity" }
+      required: [walletBalanceKsh, activeBotCount, deployingBotCount, monthlySpendKsh, botsFundable, nextRenewalAt, recentActivity]
+    WalletEntry:
+      type: object
+      properties:
+        id: { type: string }
+        kind: { type: string, enum: [credit, debit, refund] }
+        status: { type: string, enum: [completed, pending, failed] }
+        amountKsh: { type: integer }
+        description: { type: string }
+        reference: { type: string }
+        createdAt: { type: string, format: date-time }
+      required: [id, kind, status, amountKsh, description, reference, createdAt]
+    Wallet:
+      type: object
+      properties:
+        balanceKsh: { type: integer }
+        monthlyPriceKsh: { type: integer }
+        activeBotCount: { type: integer }
+        botsFundable: { type: integer }
+        entries:
+          type: array
+          items: { $ref: "#/components/schemas/WalletEntry" }
+      required: [balanceKsh, monthlyPriceKsh, activeBotCount, botsFundable, entries]
+    WalletTopupInput:
+      type: object
+      properties:
+        amountKsh: { type: integer, minimum: 50, maximum: 500000 }
+      required: [amountKsh]
+    CheckoutSession:
+      type: object
+      properties:
+        authorizationUrl: { type: string, format: uri }
+        reference: { type: string }
+        amountKsh: { type: integer }
+      required: [authorizationUrl, reference, amountKsh]
+    PaymentVerification:
+      type: object
+      properties:
+        status: { type: string, enum: [successful, pending, failed] }
+        amountKsh: { type: integer }
+        walletBalanceKsh: { type: integer }
+      required: [status, amountKsh, walletBalanceKsh]
+    PaystackWebhookEvent:
+      type: object
+      additionalProperties: true
+    WebhookReceipt:
+      type: object
+      properties:
+        received: { type: boolean }
+      required: [received]
+    BotInstance:
+      type: object
+      properties:
+        id: { type: string }
+        templateId: { type: string }
+        templateName: { type: string }
+        name: { type: string }
+        status:
+          type: string
+          enum: [queued, deploying, running, stopped, past_due, failed]
+        herokuAppName: { type: [string, "null"] }
+        phoneNumber: { type: [string, "null"] }
+        errorMessage: { type: [string, "null"] }
+        createdAt: { type: string, format: date-time }
+        renewalAt: { type: [string, "null"], format: date-time }
+      required: [id, templateId, templateName, name, status, herokuAppName, phoneNumber, errorMessage, createdAt, renewalAt]
+    BotInstanceInput:
+      type: object
+      properties:
+        templateId: { type: string }
+        name: { type: string, minLength: 2, maxLength: 50 }
+        sessionId: { type: string, minLength: 1, maxLength: 8192 }
+        repositoryUrl: { type: string, format: uri, maxLength: 500 }
+      required: [templateId, name, sessionId, repositoryUrl]
+  responses:
+    Unauthorized:
+      description: Sign in to continue
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: { type: string }
+            required: [error]
 
