@@ -37,7 +37,8 @@ import {
 } from "@workspace/db";
 import { Router, type IRouter, type RequestHandler } from "express";
 import { ensureWalletAccount, getVerifiedAccountEmail } from "../lib/accounts";
-import { BOT_TEMPLATES, getBotTemplate } from "../lib/bot-templates";
+import { sendRenewalReminder } from "../lib/renewal-email";
+import { BOT_TEMPLATES, getBotRepositoryUrl, getBotTemplate } from "../lib/bot-templates";
 import {
   createHerokuDeployment,
   getHerokuBuild,
@@ -500,16 +501,9 @@ router.post("/instances", async (req, res): Promise<void> => {
     res.status(400).json({ error: "Choose an available bot template." });
     return;
   }
-  const repoUrl = new URL(parsed.data.repositoryUrl);
-  if (
-    repoUrl.protocol !== "https:" ||
-    repoUrl.hostname !== "github.com" ||
-    repoUrl.username ||
-    repoUrl.password ||
-    repoUrl.search ||
-    repoUrl.hash
-  ) {
-    res.status(400).json({ error: "Use a public GitHub repository URL." });
+  const repositoryUrl = getBotRepositoryUrl(template.id);
+  if (!repositoryUrl) {
+    res.status(400).json({ error: "This bot does not have an approved source repository." });
     return;
   }
 
@@ -548,7 +542,7 @@ router.post("/instances", async (req, res): Promise<void> => {
         templateId: template.id,
         templateName: template.name,
         name: parsed.data.name,
-        repositoryUrl: repoUrl.toString(),
+        repositoryUrl: repositoryUrl,
         status: "queued",
         encryptedSessionId: encryptSessionId(parsed.data.sessionId),
         renewalAt,
@@ -574,7 +568,7 @@ router.post("/instances", async (req, res): Promise<void> => {
   try {
     const deployment = await createHerokuDeployment({
       appName: deploymentName,
-      repositoryUrl: repoUrl.toString(),
+      repositoryUrl: repositoryUrl,
       sessionId: parsed.data.sessionId,
       botTemplateId: template.id,
     });
@@ -769,7 +763,67 @@ router.post("/instances/:instanceId/renew", async (req, res): Promise<void> => {
   res.json(RenewBotInstanceResponse.parse(mapInstance(updated)));
 });
 
+async function sendUpcomingRenewalReminders(): Promise<void> {
+  const publicAppUrl = process.env.PUBLIC_APP_URL;
+  if (!publicAppUrl || !process.env.RESEND_API_KEY || !process.env.RESEND_FROM_EMAIL) return;
+  let walletUrl: string;
+  try {
+    const origin = new URL(publicAppUrl);
+    if (origin.protocol !== "https:") return;
+    walletUrl = new URL("/wallet", origin).toString();
+  } catch {
+    return;
+  }
+  const now = new Date();
+  const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const upcoming = await db
+    .select()
+    .from(botInstancesTable)
+    .where(and(
+      eq(botInstancesTable.status, "running"),
+      gte(botInstancesTable.renewalAt, now),
+      lt(botInstancesTable.renewalAt, tomorrow),
+    ));
+  for (const instance of upcoming) {
+    if (!instance.renewalAt) continue;
+    const marker = `renewal-reminder:${instance.id}:${instance.renewalAt.getTime()}`;
+    const [sent] = await db
+      .select({ id: activitiesTable.id })
+      .from(activitiesTable)
+      .where(and(
+        eq(activitiesTable.clerkUserId, instance.clerkUserId),
+        eq(activitiesTable.title, "Renewal reminder sent"),
+        eq(activitiesTable.detail, marker),
+      ))
+      .limit(1);
+    if (sent) continue;
+    try {
+      const email = await getVerifiedAccountEmail(instance.clerkUserId);
+      const delivered = await sendRenewalReminder({
+        to: email,
+        botName: instance.name,
+        renewalDate: instance.renewalAt,
+        walletUrl,
+      });
+      if (delivered) {
+        await db.insert(activitiesTable).values({
+          clerkUserId: instance.clerkUserId,
+          title: "Renewal reminder sent",
+          detail: marker,
+          kind: "renewal",
+        });
+      }
+    } catch (error) {
+      import("../lib/logger").then(({ logger }) => logger.warn(
+        { instanceId: instance.id, message: error instanceof Error ? error.message : "unknown" },
+        "Could not send upcoming renewal reminder",
+      ));
+    }
+  }
+}
+
 async function runRenewalSweep(): Promise<void> {
+  await sendUpcomingRenewalReminders();
   const due = await db
     .select()
     .from(botInstancesTable)
@@ -864,6 +918,6 @@ setInterval(() => {
       ),
     );
   });
-}, 60 * 60 * 1000).unref();
+}, 15 * 60 * 1000).unref();
 
 export default router;

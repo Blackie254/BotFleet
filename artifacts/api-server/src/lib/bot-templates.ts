@@ -1,37 +1,31 @@
 import { ListBotTemplatesResponseItem } from "@workspace/api-zod";
 
+// Only list bots with a source repository explicitly supplied by the owner.
 const templates = [
   {
-    id: "smart-reply",
-    name: "Smart Reply",
-    description: "A personal auto-reply assistant for incoming WhatsApp messages.",
-    category: "Automation",
-    icon: "sparkles",
+    id: "black-md",
+    name: "BLACK MD BOT",
+    description:
+      "Deploy the BLACK MD WhatsApp bot from its public source repository. Pair your own WhatsApp account using the official pairing page.",
+    category: "WhatsApp automation",
+    icon: "message-circle",
     monthlyPriceKsh: 50,
-    features: ["Always-on replies", "Keyword workflows", "Personal account pairing"],
-    setupMode: "session_id",
-  },
-  {
-    id: "store-assistant",
-    name: "Store Assistant",
-    description: "A customer-facing helper for answering product and service questions.",
-    category: "Commerce",
-    icon: "store",
-    monthlyPriceKsh: 50,
-    features: ["Customer support", "Quick answers", "Personal account pairing"],
-    setupMode: "session_id",
-  },
-  {
-    id: "group-guardian",
-    name: "Group Guardian",
-    description: "A group helper for keeping conversations organized and on-topic.",
-    category: "Community",
-    icon: "shield",
-    monthlyPriceKsh: 50,
-    features: ["Group workflows", "Automated responses", "Personal account pairing"],
+    features: [
+      "Your own WhatsApp session",
+      "Source: Blackie254/black-super-bot",
+      "Monthly hosting on Heroku",
+    ],
     setupMode: "session_id",
   },
 ] as const;
+
+export const BOT_REPOSITORIES: Record<string, string> = {
+  "black-md": "https://github.com/Blackie254/black-super-bot",
+};
+
+export function getBotRepositoryUrl(templateId: string): string | undefined {
+  return BOT_REPOSITORIES[templateId];
+}
 
 export const BOT_TEMPLATES = templates.map((template) =>
   ListBotTemplatesResponseItem.parse(template),

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ClerkProvider, SignIn, SignUp, Show, useClerk, useUser } from '@clerk/react';
-import { publishableKeyFromHost } from '@clerk/react/internal';
 import { shadcn } from '@clerk/themes';
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import {
@@ -25,9 +24,9 @@ import { Link, Redirect, Route, Switch, useLocation, Router as WouterRouter } fr
 
 const queryClient = new QueryClient();
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
-const clerkPubKey = publishableKeyFromHost(window.location.hostname, import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
+const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 const clerkProxyUrl = import.meta.env.VITE_CLERK_PROXY_URL;
-if (!clerkPubKey) throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY in .env file');
+
 function stripBase(path: string) { return basePath && path.startsWith(basePath) ? path.slice(basePath.length) || '/' : path; }
 
 const clerkAppearance = {
@@ -38,25 +37,25 @@ const clerkAppearance = {
     logoImageUrl: `${window.location.origin}${basePath}/logo.svg`,
   },
   variables: {
-    colorPrimary: '#20c98a', colorForeground: '#edece6', colorMutedForeground: '#a0aaa7',
-    colorDanger: '#ef7772', colorBackground: '#171e22', colorInput: '#101619',
-    colorInputForeground: '#edece6', colorNeutral: '#344148', fontFamily: 'Manrope',
+    colorPrimary: '#0877ef', colorForeground: '#10243a', colorMutedForeground: '#536b82',
+    colorDanger: '#d84c6f', colorBackground: '#ffffff', colorInput: '#f8fbff',
+    colorInputForeground: '#10243a', colorNeutral: '#d6e5f1', fontFamily: 'Manrope',
     borderRadius: '0.8rem',
   },
   elements: {
     rootBox: 'w-full flex justify-center',
-    cardBox: 'bg-[#171e22] rounded-2xl w-[440px] max-w-full overflow-hidden border border-[#344148]',
+    cardBox: 'bg-white rounded-2xl w-[440px] max-w-full overflow-hidden border border-[#dceaf5]',
     card: '!shadow-none !border-0 !bg-transparent !rounded-none',
     footer: '!shadow-none !border-0 !bg-transparent !rounded-none',
-    headerTitle: 'text-[#edece6] font-bold', headerSubtitle: 'text-[#a0aaa7]',
-    socialButtonsBlockButtonText: 'text-[#edece6] font-semibold', formFieldLabel: 'text-[#edece6] font-semibold',
-    footerActionLink: 'text-[#20c98a] font-bold', footerActionText: 'text-[#a0aaa7]',
-    dividerText: 'text-[#a0aaa7]', identityPreviewEditButton: 'text-[#20c98a]',
-    formFieldSuccessText: 'text-[#20c98a]', alertText: 'text-[#edece6]',
-    logoBox: 'mb-5', logoImage: 'rounded-lg', socialButtonsBlockButton: 'border border-[#344148] bg-[#101619]',
-    formButtonPrimary: 'bg-[#20c98a] text-[#07130f] font-extrabold', formFieldInput: 'bg-[#101619] border-[#344148] text-[#edece6]',
-    footerAction: 'border-0', dividerLine: 'bg-[#344148]', alert: 'border-[#344148] bg-[#101619]',
-    otpCodeFieldInput: 'bg-[#101619] border-[#344148] text-[#edece6]', formFieldRow: 'gap-2', main: 'gap-5',
+    headerTitle: 'text-[#10243a] font-bold', headerSubtitle: 'text-[#536b82]',
+    socialButtonsBlockButtonText: 'text-[#10243a] font-semibold', formFieldLabel: 'text-[#10243a] font-semibold',
+    footerActionLink: 'text-[#0877ef] font-bold', footerActionText: 'text-[#536b82]',
+    dividerText: 'text-[#536b82]', identityPreviewEditButton: 'text-[#0877ef]',
+    formFieldSuccessText: 'text-[#0877ef]', alertText: 'text-[#10243a]',
+    logoBox: 'mb-5', logoImage: 'rounded-lg', socialButtonsBlockButton: 'border border-[#dceaf5] bg-white',
+    formButtonPrimary: 'bg-[#0877ef] text-white font-extrabold', formFieldInput: 'bg-[#f8fbff] border-[#dceaf5] text-[#10243a]',
+    footerAction: 'border-0', dividerLine: 'bg-[#dceaf5]', alert: 'border-[#dceaf5] bg-[#f8fbff]',
+    otpCodeFieldInput: 'bg-[#f8fbff] border-[#dceaf5] text-[#10243a]', formFieldRow: 'gap-2', main: 'gap-5',
   },
 };
 
@@ -111,8 +110,8 @@ function PublicHome() {
           <div className="console-bottom"><ShieldCheck size={14}/> YOUR BOT INFRASTRUCTURE, HANDLED.</div>
         </div>
         <div className="float-chip chip-one"><span className="chip-icon"><Check size={14}/></span><span><b>Deployment ready</b><small>just now · Nairobi region</small></span></div>
-        <div className="float-chip chip-two"><span className="chip-signal"><i/><i/><i/><i/></span><span><b>99.98% uptime</b><small>this month</small></span></div>
-        <div className="visual-caption">CONTROL ROOM PREVIEW <span>01 — 04</span></div>
+        <div className="float-chip chip-two"><span className="chip-signal"><i/><i/><i/><i/></span><span><b>Live deployment controls</b><small>this month</small></span></div>
+        <div className="visual-caption">CONTROL ROOM PREVIEW / SAMPLE DATA <span>01 — 04</span></div>
       </div>
       <div className="hero-foot"><span>HOSTED IN EAST AFRICA</span><span>PAY AS YOU GO</span><span>BUILT FOR WHATSAPP</span><span>SECURE BY DEFAULT</span></div>
     </section>
@@ -167,16 +166,16 @@ function StatCard({ icon,label,value,detail,tone,action }: {icon:ReactNode;label
 function PanelHeading({label,title,trailing}:{label:string;title:string;trailing?:ReactNode}) { return <div className="panel-heading"><div><small>{label}</small><h3>{title}</h3></div>{trailing}</div>; }
 
 function BotsPage() {
-  const query=useListBotTemplates(); const wallet=useGetWallet(); const mutation=useCreateBotInstance(); const client=useQueryClient(); const [selected,setSelected]=useState<BotTemplate|null>(null); const [name,setName]=useState(''); const [session,setSession]=useState(''); const [repo,setRepo]=useState(''); const [notice,setNotice]=useState('');
-  const deploy=(e:React.FormEvent)=>{e.preventDefault();if(!selected)return; mutation.mutate({data:{templateId:selected.id,name:name.trim(),sessionId:session.trim(),repositoryUrl:repo.trim()}},{onSuccess:()=>{client.invalidateQueries({queryKey:getListBotInstancesQueryKey()});client.invalidateQueries({queryKey:getGetDashboardSummaryQueryKey()});client.invalidateQueries({queryKey:getGetWalletQueryKey()});setSelected(null);setName('');setSession('');setRepo('');setNotice('Deployment queued. We’ll bring your bot online shortly.');},onError:()=>setNotice('We couldn’t start this deployment. Check your wallet and try again.')});};
+  const query=useListBotTemplates(); const wallet=useGetWallet(); const mutation=useCreateBotInstance(); const client=useQueryClient(); const [selected,setSelected]=useState<BotTemplate|null>(null); const [name,setName]=useState(''); const [session,setSession]=useState(''); const [repo,setRepo]=useState('https://github.com/Blackie254/black-super-bot'); const [notice,setNotice]=useState('');
+  const deploy=(e:React.FormEvent)=>{e.preventDefault();if(!selected)return; mutation.mutate({data:{templateId:selected.id,name:name.trim(),sessionId:session.trim(),repositoryUrl:repo.trim()}},{onSuccess:()=>{client.invalidateQueries({queryKey:getListBotInstancesQueryKey()});client.invalidateQueries({queryKey:getGetDashboardSummaryQueryKey()});client.invalidateQueries({queryKey:getGetWalletQueryKey()});setSelected(null);setName('');setSession('');setRepo('https://github.com/Blackie254/black-super-bot');setNotice('Deployment queued. We’ll bring your bot online shortly.');},onError:()=>setNotice('We couldn’t start this deployment. Check your wallet and try again.')});};
   const categories=useMemo(()=>Array.from(new Set(query.data?.map(t=>t.category)||[])),[query.data]);
   return <AppShell title="Bot catalog" kicker="TOOLS FOR YOUR WHATSAPP"><QueryState loading={query.isLoading} error={!!query.error} retry={()=>query.refetch()}>{query.data&&<><div className="catalog-intro"><div><p>Useful bots, ready for real work.</p><span>Choose a tool and we'll take care of keeping it online.</span></div><div className="wallet-capacity"><WalletCards size={16}/><span>YOUR BALANCE</span><b>{money(wallet.data?.balanceKsh)}</b><Link href="/wallet">Top up <ArrowRight size={12}/></Link></div></div>{notice&&<div className="inline-notice"><BadgeCheck size={16}/>{notice}<button onClick={()=>setNotice('')} aria-label="Dismiss"><X size={14}/></button></div>}
-      {query.data.length===0?<div className="empty-state"><Layers3/><h3>The catalog is getting ready</h3><p>Check back soon for bots you can launch.</p></div>:<>{categories.map((category)=>{const templates=query.data!.filter(t=>t.category===category);return <section className="catalog-section" key={category}><div className="category-heading"><span>{category}</span><i/>{String(templates.length).padStart(2,'0')} AVAILABLE</div><div className="template-grid">{templates.map((template,index)=><TemplateCard key={template.id} template={template} index={index} onDeploy={()=>{setSelected(template);setName(template.name);setNotice('')}}/>)}</div></section>;})}</>}
+      {query.data.length===0?<div className="empty-state"><Layers3/><h3>The catalog is getting ready</h3><p>Check back soon for bots you can launch.</p></div>:<>{categories.map((category)=>{const templates=query.data!.filter(t=>t.category===category);return <section className="catalog-section" key={category}><div className="category-heading"><span>{category}</span><i/>{String(templates.length).padStart(2,'0')} AVAILABLE</div><div className="template-grid">{templates.map((template,index)=><TemplateCard key={template.id} template={template} index={index} onDeploy={()=>{setSelected(template);setName(template.id==='black-md'?'blackmd-01':template.name);setRepo(template.id==='black-md'?'https://github.com/Blackie254/black-super-bot':'');setNotice('')}}/>)}</div></section>;})}</>}
       </>}</QueryState>
-      {selected&&<div className="modal-backdrop" role="presentation" onClick={()=>setSelected(null)}><div className="deploy-modal" role="dialog" aria-modal="true" aria-labelledby="deploy-title" onClick={e=>e.stopPropagation()}><div className="modal-top"><div className="bot-icon bot-icon-green"><MessageCircle size={18}/></div><button className="icon-button" onClick={()=>setSelected(null)} aria-label="Close"><X size={18}/></button></div><div className="page-kicker">NEW DEPLOYMENT / {selected.category}</div><h2 id="deploy-title">Set up {selected.name}</h2><p className="modal-description">Give this instance a name and enter the session details for your WhatsApp bot.</p><form onSubmit={deploy} className="deploy-form"><label>INSTANCE NAME<input required minLength={2} maxLength={50} value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Jirani support" data-testid="input-instance-name"/></label><label>WHATSAPP SESSION ID<input required value={session} onChange={e=>setSession(e.target.value)} placeholder="Paste your session ID" data-testid="input-session-id"/></label><label>REPOSITORY URL <span className="optional">OPTIONAL</span><input value={repo} onChange={e=>setRepo(e.target.value)} placeholder="https://github.com/…" data-testid="input-repository-url"/></label><div className="deploy-cost"><span>MONTHLY HOSTING</span><strong>{money(selected.monthlyPriceKsh)}</strong><small>Wallet balance: {money(wallet.data?.balanceKsh)}</small></div>{mutation.error&&<p className="form-error">Deployment failed. Check your wallet balance and try again.</p>}<Button type="submit" className="btn-full" disabled={mutation.isPending}>{mutation.isPending?<><LoaderCircle className="spin" size={16}/> Preparing deployment…</>:<><Rocket size={16}/> Launch bot</>}</Button></form></div></div>}
+      {selected&&<div className="modal-backdrop" role="presentation" onClick={()=>setSelected(null)}><div className="deploy-modal" role="dialog" aria-modal="true" aria-labelledby="deploy-title" onClick={e=>e.stopPropagation()}><div className="modal-top"><div className="bot-icon bot-icon-green"><MessageCircle size={18}/></div><button className="icon-button" onClick={()=>setSelected(null)} aria-label="Close"><X size={18}/></button></div><div className="page-kicker">NEW DEPLOYMENT / {selected.category}</div><h2 id="deploy-title">Set up {selected.name}</h2><p className="modal-description">Give this instance a name and enter the session details for your WhatsApp bot.</p><form onSubmit={deploy} className="deploy-form"><label>INSTANCE NAME<input required minLength={2} maxLength={50} value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Jirani support" data-testid="input-instance-name"/></label><div className="pairing-help"><span>1</span><div><b>Pair your WhatsApp account</b><p>Open the official pairing page, scan the QR, and copy the session ID it gives you.</p><a href="https://blackmd-pairing.onrender.com" target="_blank" rel="noreferrer">Open BLACK MD pairing <ExternalLink size={13}/></a></div></div><label>WHATSAPP SESSION ID<input required type="password" autoComplete="off" value={session} onChange={e=>setSession(e.target.value)} placeholder="Paste the session ID from the pairing page" data-testid="input-session-id"/></label><label>APPROVED BOT SOURCE<input value={repo} readOnly aria-readonly="true" data-testid="input-repository-url"/><span className="optional">Verified catalog source — users cannot substitute arbitrary code</span></label><div className="deploy-cost"><span>MONTHLY HOSTING</span><strong>{money(selected.monthlyPriceKsh)}</strong><small>Wallet balance: {money(wallet.data?.balanceKsh)}</small></div>{mutation.error&&<p className="form-error">{mutation.error instanceof Error ? mutation.error.message : "Deployment failed. Check your wallet balance and try again."}</p>}<Button type="submit" className="btn-full" disabled={mutation.isPending}>{mutation.isPending?<><LoaderCircle className="spin" size={16}/> Preparing deployment…</>:<><Rocket size={16}/> Launch bot</>}</Button></form></div></div>}
     </AppShell>;
 }
-function TemplateCard({template,index,onDeploy}:{template:BotTemplate;index:number;onDeploy:()=>void}) { return <article className={`template-card animate-rise delay-${(index%3)+1}`}><div className="template-top"><div className={`bot-icon ${index%3===1?'bot-icon-gold':index%3===2?'bot-icon-coral':'bot-icon-green'}`}><MessageCircle size={18}/></div><span className="template-category">{template.category}</span><button className="icon-button template-more" aria-label={`More about ${template.name}`} onClick={()=>window.alert(`${template.name}: ${template.description}`)}><MoreHorizontal size={18}/></button></div><h3>{template.name}</h3><p>{template.description}</p><ul>{template.features.map(feature=><li key={feature}><Check size={13}/>{feature}</li>)}</ul><div className="template-bottom"><div><small>MONTHLY HOSTING</small><strong>{money(template.monthlyPriceKsh)}<span> / mo</span></strong></div><Button onClick={onDeploy}>Deploy <ArrowRight size={14}/></Button></div></article>; }
+function TemplateCard({template,index,onDeploy}:{template:BotTemplate;index:number;onDeploy:()=>void}) { return <article className={`template-card animate-rise delay-${(index%3)+1}`}><div className="template-top">{template.id==='black-md'?<img className="bot-cover" src="https://files.catbox.moe/s5nuh3.jpg" alt="BLACK MD BOT logo" loading="lazy"/>:<div className={`bot-icon ${index%3===1?'bot-icon-gold':index%3===2?'bot-icon-coral':'bot-icon-green'}`}><MessageCircle size={18}/></div>}<span className="template-category">{template.category}</span><button className="icon-button template-more" aria-label={`More about ${template.name}`} onClick={()=>window.alert(`${template.name}: ${template.description}`)}><MoreHorizontal size={18}/></button></div><h3>{template.name}</h3><p>{template.description}</p><ul>{template.features.map(feature=><li key={feature}><Check size={13}/>{feature}</li>)}</ul><div className="template-bottom"><div><small>MONTHLY HOSTING</small><strong>{money(template.monthlyPriceKsh)}<span> / mo</span></strong></div><Button onClick={onDeploy}>Deploy <ArrowRight size={14}/></Button></div></article>; }
 
 function WalletPage() {
   const query=useGetWallet();const topup=useCreateWalletTopup();const [amount,setAmount]=useState('1000');const [showForm,setShowForm]=useState(false);const [error,setError]=useState('');const client=useQueryClient();
@@ -211,6 +210,9 @@ function ClerkQueryClientCacheInvalidator() {
 }
 function ClerkRoutes() {
  const [,setLocation]=useLocation();
+ if (!clerkPubKey) {
+  return <QueryClientProvider client={queryClient}><Switch><Route path="/" component={PublicHome}/><Route component={AuthSetupNotice}/></Switch></QueryClientProvider>;
+ }
  return <ClerkProvider publishableKey={clerkPubKey} proxyUrl={clerkProxyUrl} appearance={clerkAppearance} signInUrl={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} localization={{signIn:{start:{title:'Welcome back',subtitle:'Your bots have been busy.'}},signUp:{start:{title:'Build something brilliant',subtitle:'Your WhatsApp operation starts here.'}}}} routerPush={to=>setLocation(stripBase(to))} routerReplace={to=>setLocation(stripBase(to),{replace:true})}>
   <QueryClientProvider client={queryClient}><ClerkQueryClientCacheInvalidator/><PageBoundary><Switch>
    <Route path="/" component={HomeRedirect}/>
@@ -223,6 +225,9 @@ function ClerkRoutes() {
    <Route component={NotFound}/>
   </Switch></PageBoundary><Toaster/></QueryClientProvider>
  </ClerkProvider>;
+}
+function AuthSetupNotice() {
+ return <main className="auth-page"><section className="setup-notice"><Brand/><h1>Account services are being connected.</h1><p>Login, wallet and deployments activate after the owner configures the authentication and hosting credentials.</p><Link href="/" className="btn btn-primary">Back to BotFleet</Link></section></main>;
 }
 function App() {
  return <TooltipProvider><WouterRouter base={basePath}><ClerkRoutes/></WouterRouter></TooltipProvider>;
